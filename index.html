@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regus Suite 350 - Office Manager</title>
+    <title>Dykema North - Bloomfield Hills Office Manager</title>
     <style>
         :root {
             --vacant-green: #2e7d32;
@@ -30,13 +30,12 @@
             background: white;
             border-radius: 12px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            max-width: 1100px;
+            max-width: 1200px;
             width: 100%;
             overflow: hidden;
             border: 1px solid #ddd;
         }
 
-        /* OFFICE SELECTION AREA */
         .office-area {
             flex: 2;
             display: grid;
@@ -63,11 +62,10 @@
             gap: 12px;
         }
 
-        /* Container for a single row in the list */
         .office-row {
             display: flex;
-            gap: 10px; /* Space between desks in a split office */
-            height: 45px; /* Fixed height to keep A and Z columns aligned */
+            gap: 10px;
+            min-height: 55px;
         }
 
         .office-card {
@@ -80,9 +78,8 @@
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-weight: 600;
-            font-size: 0.85rem;
             text-align: center;
+            padding: 5px;
         }
 
         .office-card:hover:not(.is-reserved) {
@@ -91,19 +88,15 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
 
-        /* Visual indicator for split desks */
-        .split-desk {
-            border-top: 3px solid var(--desk-blue);
-            font-size: 0.7rem;
-        }
+        .split-desk { border-top: 3px solid var(--desk-blue); }
 
-        /* STATUS STYLING */
         .is-vacant { background-color: var(--vacant-bg); color: var(--vacant-green); border-color: #c8e6c9; }
-        .is-reserved { background-color: var(--reserved-bg); color: var(--reserved-red); border-color: #ffcdd2; cursor: not-allowed; }
+        .is-reserved { background-color: var(--reserved-bg); color: var(--reserved-red); border-color: #ffcdd2; cursor: default; }
 
-        .status-text { font-size: 8px; text-transform: uppercase; margin-top: 2px; }
+        .office-id { font-weight: 700; font-size: 0.85rem; }
+        .reserve-info { font-size: 10px; margin-top: 2px; line-height: 1.2; }
+        .status-text { font-size: 8px; text-transform: uppercase; font-weight: bold; margin-top: 2px; }
 
-        /* SIDEBAR INFO */
         .sidebar {
             flex: 0.8;
             padding: 40px;
@@ -113,7 +106,7 @@
             flex-direction: column;
         }
 
-        .brand-header h1 { margin: 0; font-size: 1.4rem; color: var(--regus-dark); }
+        .brand-header h1 { margin: 0; font-size: 1.3rem; color: var(--regus-dark); }
         .brand-header p { margin: 5px 0 25px; font-size: 0.8rem; color: #666; line-height: 1.4; }
 
         .booking-box {
@@ -125,7 +118,7 @@
 
         .input-group { margin-bottom: 15px; }
         label { display: block; font-size: 10px; margin-bottom: 4px; font-weight: 700; color: #444; text-transform: uppercase; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.9rem; }
 
         .btn-confirm {
             width: 100%;
@@ -159,20 +152,28 @@
 
     <div class="sidebar">
         <div class="brand-header">
-            <h1>Bloomfield Hills</h1>
+            <h1>Dykema North - Bloomfield Hills</h1>
             <p>41000 Woodward Avenue<br>Suite 350, MI 48304</p>
         </div>
 
         <div id="default-msg">
-            <p style="color:#aaa; text-align: center; font-size: 0.85rem; margin-top: 40px;">Select an office or desk to reserve.</p>
+            <p style="color:#aaa; text-align: center; font-size: 0.85rem; margin-top: 40px;">Select an office to reserve.</p>
         </div>
 
         <div id="booking-form" class="hidden">
             <div class="booking-box">
                 <h3 style="margin: 0 0 15px 0; font-size: 1rem;">Booking: <span id="selected-office-name"></span></h3>
                 <div class="input-group">
-                    <label>Reserving For</label>
-                    <input type="text" id="user-name" placeholder="Name/Company">
+                    <label>Reserving For (Name)</label>
+                    <input type="text" id="user-name" placeholder="Adam">
+                </div>
+                <div class="input-group">
+                    <label>Duration</label>
+                    <select id="lease-term">
+                        <option value="1">Daily</option>
+                        <option value="7">Weekly</option>
+                        <option value="30">Monthly</option>
+                    </select>
                 </div>
                 <button class="btn-confirm" onclick="confirmReservation()">Confirm Reservation</button>
             </div>
@@ -187,7 +188,7 @@
     const gridZ = document.getElementById('grid-z');
     let selectedId = null;
 
-    let reservations = JSON.parse(localStorage.getItem('regus_office_db')) || {};
+    let reservations = JSON.parse(localStorage.getItem('dykema_office_db')) || {};
 
     function init() {
         renderColumn(gridA, 'A');
@@ -199,16 +200,12 @@
         for (let i = 1; i <= 16; i++) {
             const row = document.createElement('div');
             row.className = 'office-row';
-
-            // Identify split offices: Z1, Z3, Z12
             const isSplit = (prefix === 'Z' && (i === 1 || i === 3 || i === 12));
 
             if (isSplit) {
-                // Two boxes side-by-side in one row
                 row.appendChild(createBox(`${prefix}${i}-Desk 1`, true));
                 row.appendChild(createBox(`${prefix}${i}-Desk 2`, true));
             } else {
-                // One full-width box for the row
                 row.appendChild(createBox(`${prefix}${i}`, false));
             }
             container.appendChild(row);
@@ -216,15 +213,19 @@
     }
 
     function createBox(id, split) {
-        const isReserved = reservations[id];
+        const data = reservations[id];
         const div = document.createElement('div');
-        div.className = `office-card ${isReserved ? 'is-reserved' : 'is-vacant'} ${split ? 'split-desk' : ''}`;
+        div.className = `office-card ${data ? 'is-reserved' : 'is-vacant'} ${split ? 'split-desk' : ''}`;
         
-        div.innerHTML = `<div>${id}</div><div class="status-text">${isReserved ? 'Reserved' : 'Available'}</div>`;
-        
-        if (!isReserved) {
-            div.onclick = () => showForm(id);
+        let content = `<div class="office-id">${id}</div>`;
+        if (data) {
+            content += `<div class="reserve-info"><b>${data.user}</b><br>Expires ${data.expires}</div>`;
+        } else {
+            content += `<div class="status-text">Available</div>`;
         }
+        
+        div.innerHTML = content;
+        if (!data) div.onclick = () => showForm(id);
         return div;
     }
 
@@ -237,18 +238,27 @@
 
     function confirmReservation() {
         const name = document.getElementById('user-name').value;
+        const days = parseInt(document.getElementById('lease-term').value);
         if (!name) return alert("Please enter a name.");
 
-        reservations[selectedId] = { name: name };
-        localStorage.setItem('regus_office_db', JSON.stringify(reservations));
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + days);
+        const options = { month: 'long', day: 'numeric', year: 'numeric' };
+        const expiryString = expiryDate.toLocaleDateString('en-US', options);
+
+        reservations[selectedId] = { 
+            user: name, 
+            expires: expiryString 
+        };
+        localStorage.setItem('dykema_office_db', JSON.stringify(reservations));
         
-        alert(`Success: ${selectedId} is now reserved.`);
+        alert(`Success: ${selectedId} is now reserved for ${name}.`);
         location.reload();
     }
 
     function resetDatabase() {
         if(confirm("Clear all reservation data?")) {
-            localStorage.removeItem('regus_office_db');
+            localStorage.removeItem('dykema_office_db');
             location.reload();
         }
     }
