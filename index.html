@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Office Reservation - Suite 350</title>
+    <style>
+        :root{
+            --vacant-green:#2e7d32;
+            --vacant-bg:#e8f5e9;
+            --reserved-red:#c62828;
+            --reserved-bg:#ffebee;
+            --regus-grey:#333;
+        }
+
+        html,body{height:100%;margin:0;}
+        body{
+            font-family:'Segoe UI', Arial, sans-serif;
+            background-color:#f8f9fa;
+            display:flex;
+            justify-content:center;
+            padding:40px 20px;
+        }
+
+        .container{
+            display:flex;
+            gap:40px;
+            background:#fff;
+            padding:30px;
+            border-radius:12px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.08);
+            max-width:1100px;
+            width:100%;
+        }
+
+        .office-columns{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:20px;
+            flex:2;
+        }
+
+        .column-header{
+            text-align:center;
+            font-weight:bold;
+            padding-bottom:10px;
+            border-bottom:2px solid #eee;
+            margin-bottom:15px;
+            color:var(--regus-grey);
+        }
+
+        .office-list{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+
+        .office-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:12px 15px;
+            border:1px solid #ddd;
+            border-radius:6px;
+            cursor:pointer;
+            transition:0.2s;
+            position:relative;
+        }
+
+        .office-item:hover{
+            transform:translateX(5px);
+            box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .vacant{
+            background-color:var(--vacant-bg);
+            border-color:#c8e6c9;
+            color:var(--vacant-green);
+        }
+        .vacant::after{
+            content:"VACANT";
+            font-size:10px;
+            font-weight:bold;
+            position:absolute;
+            right:10px;
+            top:8px;
+            color:var(--vacant-green);
+            background:transparent;
+        }
+
+        .reserved{
+            background-color:var(--reserved-bg);
+            border-color:#ffcdd2;
+            color:var(--reserved-red);
+            cursor:not-allowed;
+        }
+        .reserved::after{
+            content:"RESERVED";
+            font-size:10px;
+            font-weight:bold;
+            position:absolute;
+            right:10px;
+            top:8px;
+            color:var(--reserved-red);
+        }
+
+        .sidebar{
+            flex:1;
+            border-left:1px solid #eee;
+            padding-left:30px;
+        }
+
+        .address-box{margin-bottom:25px;}
+        .address-box h2{margin:0;font-size:1.5rem;}
+        .address-box p{color:#666;margin:5px 0;font-size:0.9rem;}
+
+        .booking-ui{
+            background:#fdfdfd;
+            border:1px solid #eee;
+            padding:20px;
+            border-radius:8px;
+        }
+
+        .btn-action{
+            width:100%;
+            padding:12px;
+            background:var(--regus-grey);
+            color:white;
+            border:none;
+            border-radius:4px;
+            font-weight:bold;
+            cursor:pointer;
+            margin-top:15px;
+        }
+
+        .hidden{display:none;}
+
+        input[type="text"], select{
+            width:100%;
+            padding:8px;
+            margin:5px 0 15px;
+            border:1px solid #ddd;
+            border-radius:4px;
+            box-sizing:border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="office-columns">
+        <div>
+            <div class="column-header">Section A (External)</div>
+            <div class="office-list" id="colA"></div>
+        </div>
+
+        <div>
+            <div class="column-header">Section Z (Internal)</div>
+            <div class="office-list" id="colZ"></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="address-box">
+            <h2>Bloomfield Hills</h2>
+            <p>41000 Woodward Avenue [cite: 2]</p>
+            <p>Suite 350, MI 48304 [cite: 3, 4]</p>
+        </div>
+
+        <div id="instruction">
+            <p style="color:#888;">Select a green office to begin your reservation.</p>
+        </div>
+
+        <div id="form-container" class="hidden">
+            <div class="booking-ui">
+                <h3 style="margin-top:0;">Reserve <span id="target-id"></span></h3>
+                <label style="font-size:12px;">Full Name</label>
+                <input id="full-name" type="text" aria-label="Full name">
+
+                <label style="font-size:12px;">Duration</label>
+                <select id="duration" aria-label="Duration">
+                    <option>Daily</option>
+                    <option>Weekly</option>
+                    <option>Monthly</option>
+                </select>
+
+                <button type="button" class="btn-action" id="complete-btn">Complete Booking</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Elements
+    const colA = document.getElementById('colA');
+    const colZ = document.getElementById('colZ');
+    const instruction = document.getElementById('instruction');
+    const formContainer = document.getElementById('form-container');
+    const targetIdEl = document.getElementById('target-id');
+    const completeBtn = document.getElementById('complete-btn');
+
+    // Utility to create list of offices
+    function createList(container, prefix, count, reservedIndices = []) {
+        for (let i = 1; i <= count; i++) {
+            const id = prefix + i;
+            const div = document.createElement('div');
+            const isReserved = reservedIndices.includes(i);
+
+            div.className = `office-item ${isReserved ? 'reserved' : 'vacant'}`;
+            div.innerHTML = `<span>Office ${id}</span>`;
+
+            if (!isReserved) {
+                // keyboard accessible
+                div.setAttribute('role', 'button');
+                div.setAttribute('tabindex', '0');
+                div.addEventListener('click', () => selectOffice(id));
+                div.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectOffice(id);
+                    }
+                });
+            }
+
+            container.appendChild(div);
+        }
+    }
+
+    function selectOffice(id) {
+        instruction.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+        targetIdEl.textContent = id;
+        document.getElementById('full-name').focus();
+    }
+
+    function completeBooking() {
+        const name = document.getElementById('full-name').value.trim() || 'Guest';
+        const duration = document.getElementById('duration').value;
+        const office = targetIdEl.textContent;
+        alert(`Reservation confirmed for ${office}\nName: ${name}\nDuration: ${duration}`);
+        // basic UX: reset to initial state
+        location.reload();
+    }
+
+    completeBtn.addEventListener('click', completeBooking);
+
+    // Initialize: 16 external (A), 14 internal (Z)
+    // Example reserved: A3, A8, Z2
+    createList(colA, 'A', 16, [3, 8]);
+    createList(colZ, 'Z', 14, [2]);
+</script>
+</body>
+</html>
