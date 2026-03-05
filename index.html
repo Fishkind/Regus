@@ -1,213 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Regus Suite 350 - Office Manager</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regus Bloomfield Hills - Suite 350</title>
     <style>
-        :root{
-            --vacant-green:#2e7d32;
-            --vacant-bg:#e8f5e9;
-            --reserved-red:#c62828;
-            --reserved-bg:#ffebee;
-            --regus-dark:#222;
+        :root {
+            --vacant-green: #2e7d32;
+            --vacant-bg: #e8f5e9;
+            --reserved-red: #c62828;
+            --reserved-bg: #ffebee;
+            --regus-dark: #222;
+            --desk-blue: #1976d2;
         }
-        html,body{height:100%;margin:0;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;background:#f5f5f5}
-        body{display:flex;justify-content:center;padding:40px 20px}
-        .container{display:flex;gap:40px;background:#fff;padding:30px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.1);max-width:1000px;width:100%}
-        .office-area{flex:2;display:grid;grid-template-columns:1fr 1fr;gap:20px}
-        .column-label{text-align:center;font-weight:700;color:var(--regus-dark);border-bottom:2px solid #eee;padding-bottom:10px;margin-bottom:15px;text-transform:uppercase;letter-spacing:1px}
-        .grid{display:flex;flex-direction:column;gap:10px}
-        .office-card{display:flex;justify-content:space-between;align-items:center;padding:15px;border:1px solid #ddd;border-radius:6px;cursor:pointer;transition:all .15s;font-weight:600;background:#fff}
-        .office-card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.05)}
-        .is-vacant{background:var(--vacant-bg);border-color:#c8e6c9;color:var(--vacant-green)}
-        .is-vacant::after{content:"VACANT";font-size:10px;opacity:.8;margin-left:8px}
-        .is-reserved{background:var(--reserved-bg);border-color:#ffcdd2;color:var(--reserved-red)}
-        .is-reserved::after{content:"RESERVED";font-size:10px;font-weight:700;margin-left:8px}
-        .sidebar{flex:1;padding-left:20px;border-left:1px solid #eee}
-        .brand-header h1{margin:0;font-size:1.6rem;color:var(--regus-dark)}
-        .brand-header p{margin:5px 0 25px;font-size:.9rem;color:#666;line-height:1.4}
-        .booking-box{background:#fafafa;border:1px solid #eee;padding:20px;border-radius:8px}
-        .input-group{margin-bottom:15px}
-        label{display:block;font-size:12px;margin-bottom:5px;font-weight:700}
-        input,select{width:100%;padding:10px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}
-        .btn-confirm{width:100%;background:var(--regus-dark);color:#fff;border:none;padding:12px;border-radius:4px;font-weight:700;cursor:pointer;margin-top:10px}
-        .btn-reset{background:none;border:none;color:#999;font-size:11px;text-decoration:underline;cursor:pointer;margin-top:20px;width:100%}
-        .link-btn{background:none;border:none;color:var(--regus-dark);text-decoration:underline;cursor:pointer;padding:0;font-weight:700}
-        .hidden{display:none}
-        .muted{color:#777;font-size:.95rem}
-        .meta{font-size:.85rem;color:#555;margin-top:8px}
-        .small{font-size:.85rem;color:#444}
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f2f5; /* Subtle contrast to the white container */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 0; /* Removed gap for a unified white block feel */
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 1100px;
+            width: 100%;
+            overflow: hidden; /* Clips children to rounded corners */
+        }
+
+        /* OFFICE SELECTION AREA */
+        .office-area {
+            flex: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 40px;
+            background: white;
+        }
+
+        .column-label {
+            text-align: center;
+            font-weight: 800;
+            color: var(--regus-dark);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+        }
+
+        .grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .office-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-weight: 600;
+        }
+
+        .office-card:hover:not(.is-reserved) {
+            border-color: var(--regus-dark);
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        /* TWO-PERSON OFFICE STYLING */
+        .double-desk {
+            border-left: 5px solid var(--desk-blue) !important;
+        }
+        .desk-icon {
+            font-size: 14px;
+            margin-left: 8px;
+            color: var(--desk-blue);
+        }
+
+        /* STATUS STYLING */
+        .is-vacant { background-color: var(--vacant-bg); border-color: #d0e8d1; color: var(--vacant-green); }
+        .is-reserved { background-color: var(--reserved-bg); border-color: #f9d7d9; color: var(--reserved-red); cursor: not-allowed; opacity: 0.8; }
+
+        .status-tag { font-size: 9px; font-weight: 800; text-transform: uppercase; }
+
+        /* SIDEBAR INFO */
+        .sidebar {
+            flex: 1;
+            padding: 40px;
+            background: #fafafa; /* Slight tint to differentiate from the office area */
+            border-left: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-header h1 { margin: 0; font-size: 1.4rem; color: var(--regus-dark); }
+        .brand-header p { margin: 8px 0 30px; font-size: 0.85rem; color: #777; line-height: 1.5; }
+
+        .booking-box {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 11px; margin-bottom: 6px; font-weight: 700; color: #555; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
+
+        .btn-confirm {
+            width: 100%;
+            background: var(--regus-dark);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-confirm:hover { background: #000; }
+        .btn-reset { background: none; border: none; color: #bbb; font-size: 11px; text-decoration: underline; cursor: pointer; margin-top: auto; padding-top: 20px; }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-<div class="container" role="application" aria-label="Office manager">
-    <div class="office-area" aria-hidden="false">
+
+<div class="container">
+    <div class="office-area">
         <div>
-            <div class="column-label">Section A (External)</div>
-            <div id="grid-a" class="grid" role="list"></div>
+            <div class="column-label">Section A (External) [cite: 43]</div>
+            <div id="grid-a" class="grid"></div>
         </div>
         <div>
-            <div class="column-label">Section Z (Internal)</div>
-            <div id="grid-z" class="grid" role="list"></div>
+            <div class="column-label">Section Z (Internal) [cite: 43]</div>
+            <div id="grid-z" class="grid"></div>
         </div>
     </div>
 
-    <div class="sidebar" aria-live="polite">
+    <div class="sidebar">
         <div class="brand-header">
-            <h1>Bloomfield Hills</h1>
-            <p class="muted">41000 Woodward Avenue<br>Suite 350, MI 48304</p>
+            <h1>Bloomfield Hills</h1> [cite: 1]
+            <p>41000 Woodward Avenue [cite: 2]<br>Suite 350, MI 48304 [cite: 3, 4]</p>
         </div>
 
         <div id="default-msg">
-            <p style="color:#999;text-align:center;margin-top:40px">Select a vacant office to begin.</p>
+            <p style="color:#aaa; text-align: center; font-size: 0.9rem; margin-top: 40px;">Select an office to view details and availability.</p>
         </div>
 
         <div id="booking-form" class="hidden">
-            <div class="booking-box" role="region" aria-labelledby="booking-title">
-                <h3 id="booking-title" style="margin-top:0">Booking: <span id="selected-office-name" style="color:var(--reserved-red)"></span></h3>
+            <div class="booking-box">
+                <h3 style="margin: 0 0 15px 0; font-size: 1.1rem;">Office <span id="selected-office-name"></span></h3>
                 <div class="input-group">
-                    <label for="user-name">Company / Name</label>
-                    <input id="user-name" type="text" placeholder="Enter name" autocomplete="organization" />
+                    <label>Full Name</label>
+                    <input type="text" id="user-name" placeholder="John Doe">
                 </div>
                 <div class="input-group">
-                    <label for="duration">Duration</label>
-                    <select id="duration">
-                        <option>Full Day</option>
-                        <option>Weekly Lease</option>
-                        <option>Monthly Office</option>
+                    <label>Lease Terms</label>
+                    <select id="lease-term">
+                        <option>Daily</option>
+                        <option>Weekly</option>
+                        <option>Monthly</option>
                     </select>
                 </div>
-                <button class="btn-confirm" id="confirm-btn">Complete Reservation</button>
+                <button class="btn-confirm" onclick="confirmReservation()">Confirm Booking</button>
             </div>
         </div>
 
-        <div id="details-panel" class="hidden">
-            <div class="booking-box" role="region" aria-labelledby="details-title">
-                <h3 id="details-title" style="margin-top:0">Reserved: <span id="detail-office-name" style="color:var(--reserved-red)"></span></h3>
-                <div class="small" id="detail-owner"></div>
-                <div class="meta" id="detail-time"></div>
-                <div style="margin-top:12px;">
-                    <button id="cancel-btn" class="btn-confirm" style="background:#c62828">Cancel Reservation</button>
-                    <button id="close-details" class="link-btn" style="margin-left:10px">Close</button>
-                </div>
-            </div>
-        </div>
-
-        <button class="btn-reset" id="reset-all">Reset All Office Data</button>
+        <button class="btn-reset" onclick="resetDatabase()">Clear All Data</button>
     </div>
 </div>
 
 <script>
     const gridA = document.getElementById('grid-a');
     const gridZ = document.getElementById('grid-z');
-    const defaultMsg = document.getElementById('default-msg');
-    const bookingForm = document.getElementById('booking-form');
-    const detailsPanel = document.getElementById('details-panel');
-    const selectedOfficeName = document.getElementById('selected-office-name');
-    const detailOfficeName = document.getElementById('detail-office-name');
-    const detailOwner = document.getElementById('detail-owner');
-    const detailTime = document.getElementById('detail-time');
-    const confirmBtn = document.getElementById('confirm-btn');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const closeDetails = document.getElementById('close-details');
-    const resetAll = document.getElementById('reset-all');
     let selectedId = null;
 
-    // persistent storage
-    let reservations = JSON.parse(localStorage.getItem('regus_res_data')) || {};
+    // LocalStorage Persistent Database
+    let reservations = JSON.parse(localStorage.getItem('regus_suite_350')) || {};
 
-    function initGrids(){
-        renderColumn(gridA,'A');
-        renderColumn(gridZ,'Z');
+    function init() {
+        renderColumn(gridA, 'A');
+        renderColumn(gridZ, 'Z');
     }
 
-    function renderColumn(container,prefix){
+    function renderColumn(container, prefix) {
         container.innerHTML = '';
-        for(let i=1;i<=16;i++){
+        for (let i = 1; i <= 16; i++) {
             const id = prefix + i;
-            const res = reservations[id];
+            const isReserved = reservations[id];
+            // Custom logic for Z1, Z3, Z12 (2nd Column)
+            const isDouble = (prefix === 'Z' && (i === 1 || i === 3 || i === 12));
+            
             const div = document.createElement('div');
-            div.setAttribute('role','listitem');
-            div.dataset.id = id;
-
-            if(res){
-                div.className = 'office-card is-reserved';
-                div.title = `${res.name} — reserved`;
-                div.innerHTML = `<span>Office ${id}</span><span class="small">${res.name}</span>`;
-                // allow viewing details for reserved offices
-                div.onclick = ()=> showDetails(id);
-            } else {
-                div.className = 'office-card is-vacant';
-                div.innerHTML = `<span>Office ${id}</span><span class="small">Click to book</span>`;
-                div.onclick = ()=> showForm(id);
-                div.tabIndex = 0;
-                div.onkeydown = (e)=> { if(e.key==='Enter' || e.key===' ') showForm(id); };
+            div.className = `office-card ${isReserved ? 'is-reserved' : 'is-vacant'} ${isDouble ? 'double-desk' : ''}`;
+            
+            let labelHtml = `<span>${id}${isDouble ? ' <span class="desk-icon">🪑🪑</span>' : ''}</span>`;
+            let statusHtml = `<span class="status-tag">${isReserved ? 'Reserved' : 'Vacant'}</span>`;
+            
+            div.innerHTML = labelHtml + statusHtml;
+            
+            if (!isReserved) {
+                div.onclick = () => showForm(id, isDouble);
             }
             container.appendChild(div);
         }
     }
 
-    function showForm(id){
+    function showForm(id, isDouble) {
         selectedId = id;
-        defaultMsg.classList.add('hidden');
-        detailsPanel.classList.add('hidden');
-        bookingForm.classList.remove('hidden');
-        selectedOfficeName.textContent = id;
-        document.getElementById('user-name').value = '';
-        document.getElementById('user-name').focus();
+        document.getElementById('default-msg').classList.add('hidden');
+        document.getElementById('booking-form').classList.remove('hidden');
+        document.getElementById('selected-office-name').innerText = id + (isDouble ? " (Double)" : "");
     }
 
-    function showDetails(id){
-        selectedId = id;
-        bookingForm.classList.add('hidden');
-        defaultMsg.classList.add('hidden');
-        detailsPanel.classList.remove('hidden');
-        const res = reservations[id];
-        detailOfficeName.textContent = id;
-        detailOwner.textContent = res ? `Reserved by: ${res.name}` : 'No reservation found';
-        detailTime.textContent = res ? `Since: ${new Date(res.timestamp).toLocaleString()}` : '';
+    function confirmReservation() {
+        const name = document.getElementById('user-name').value;
+        if (!name) return alert("Name required.");
+
+        reservations[selectedId] = { name: name };
+        localStorage.setItem('regus_suite_350', JSON.stringify(reservations));
+        
+        alert(`Confirmed: Office ${selectedId} is now reserved.`);
+        location.reload();
     }
 
-    confirmBtn.addEventListener('click', ()=>{
-        const name = document.getElementById('user-name').value.trim();
-        if(!name) { alert('Please enter a name.'); return; }
-        reservations[selectedId] = { name, timestamp: Date.now() };
-        localStorage.setItem('regus_res_data', JSON.stringify(reservations));
-        initGrids();
-        bookingForm.classList.add('hidden');
-        defaultMsg.classList.remove('hidden');
-        alert(`Office ${selectedId} reserved for ${name}.`);
-    });
-
-    cancelBtn.addEventListener('click', ()=>{
-        if(!selectedId || !reservations[selectedId]) return;
-        if(!confirm(`Cancel reservation for ${selectedId}?`)) return;
-        delete reservations[selectedId];
-        localStorage.setItem('regus_res_data', JSON.stringify(reservations));
-        initGrids();
-        detailsPanel.classList.add('hidden');
-        defaultMsg.classList.remove('hidden');
-    });
-
-    closeDetails.addEventListener('click', ()=>{
-        detailsPanel.classList.add('hidden');
-        defaultMsg.classList.remove('hidden');
-    });
-
-    resetAll.addEventListener('click', ()=>{
-        if(confirm('Are you sure you want to clear all reservations?')) {
-            reservations = {};
-            localStorage.removeItem('regus_res_data');
-            initGrids();
-            bookingForm.classList.add('hidden');
-            detailsPanel.classList.add('hidden');
-            defaultMsg.classList.remove('hidden');
+    function resetDatabase() {
+        if(confirm("Reset all office statuses?")) {
+            localStorage.removeItem('regus_suite_350');
+            location.reload();
         }
-    });
+    }
 
-    // initialize
-    initGrids();
+    init();
 </script>
+
 </body>
 </html>
